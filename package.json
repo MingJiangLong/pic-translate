@@ -2,11 +2,16 @@
   "name": "pic_translate",
   "version": "1.0.0",
   "description": "图片数据转化",
-  "main": "./dist/PictureTranslate.js",
+  "main": "dist/PictureTranslate.js",
   "scripts": {},
   "keywords": [
     "picture"
   ],
+  "files": [
+    "dist",
+    "@types"
+  ],
+  "types": "@types/PictureTranslate.d.d.ts",
   "author": "longjiang",
   "license": "ISC"
 }
