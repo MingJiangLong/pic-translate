@@ -83,8 +83,7 @@ function imageToCanvas(image, options) {
     if (!renderContext)
         throw new Error("CanvasRenderingContext2D  is null");
     if (options === null || options === void 0 ? void 0 : options.rotate) {
-        // renderContext.clearRect(0, 0, canvasElement.width, canvasElement.height)
-        // renderContext.save()
+        renderContext.translate(canvasElement.width / 2, canvasElement.height / 2);
         const rotateAngle = ((_h = options.rotate) !== null && _h !== void 0 ? _h : 0) * (Math.PI / 180);
         renderContext.rotate(rotateAngle);
     }

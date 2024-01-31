@@ -102,8 +102,7 @@ function imageToCanvas(image: HTMLImageElement, options?: ToCanvasOptions) {
   const renderContext = canvasElement.getContext("2d")
   if (!renderContext) throw new Error("CanvasRenderingContext2D  is null")
   if (options?.rotate) {
-    // renderContext.clearRect(0, 0, canvasElement.width, canvasElement.height)
-    // renderContext.save()
+    renderContext.translate(canvasElement.width / 2, canvasElement.height / 2)
     const rotateAngle = (options.rotate ?? 0) * (Math.PI / 180)
     renderContext.rotate(rotateAngle)
   }
