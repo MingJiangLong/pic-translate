@@ -97,54 +97,69 @@ function fileToImage(file: File) {
 
 function imageToCanvas(image: HTMLImageElement, options?: ToCanvasOptions) {
   const canvasElement = document.createElement("canvas")
-  canvasElement.width = options?.cut?.targetImage?.width ?? image.width
-  canvasElement.height = options?.cut?.targetImage?.height ?? image.height
+
+  const originStartX = options?.cut?.originImage?.x ?? 0
+  const originStartY = options?.cut?.originImage?.y ?? 0
+  const originWidth = options?.cut?.originImage?.width ?? image.width
+  const originHeight = options?.cut?.originImage?.height ?? image.height
+
+  const targetStartX = options?.cut?.targetImage?.x ?? 0
+  const targetStartY = options?.cut?.targetImage?.y ?? 0
+  const targetWidth = options?.cut?.targetImage?.width ?? image.width
+  const targetHeight = options?.cut?.targetImage?.height ?? image.height
+
+  canvasElement.width = targetWidth
+  canvasElement.height = targetHeight
   const renderContext = canvasElement.getContext("2d")
   if (!renderContext) throw new Error("CanvasRenderingContext2D  is null")
   if (options?.rotate) {
-    renderContext.translate(canvasElement.width / 2, canvasElement.height / 2)
+    const targetCenterX = targetStartX + targetWidth / 2
+    const targetCenterY = targetStartY + targetWidth / 2
+    renderContext.translate(targetCenterX, targetCenterY)
     const rotateAngle = (options.rotate ?? 0) * (Math.PI / 180)
     renderContext.rotate(rotateAngle)
   }
   renderContext.drawImage(
     image,
-    options?.cut?.originImage?.x ?? 0,
-    options?.cut?.originImage?.y ?? 0,
-    options?.cut?.originImage?.width ?? image.width,
-    options?.cut?.originImage?.height ?? image.height,
-    options?.cut?.targetImage?.x ?? 0,
-    options?.cut?.targetImage?.y ?? 0,
-    options?.cut?.targetImage?.width ?? image.width,
-    options?.cut?.targetImage?.height ?? image.height
+    originStartX,
+    originStartY,
+    originWidth,
+    originHeight,
+    targetStartX,
+    targetStartY,
+    targetWidth,
+    targetHeight
   )
-
   return canvasElement
 }
 
-export default {
-  async toImage(source: any, options: TransImageOptions) {
-    const image = await translateToImage(source)
-    if (!image) throw new Error("解析source失败")
-    const canvasElement = imageToCanvas(image, options)
-    return base64ToImage(
+export async function toImage(source: any, options: TransImageOptions) {
+  const image = await translateToImage(source)
+  if (!image) throw new Error("解析source失败")
+  const canvasElement = imageToCanvas(image, options)
+  return base64ToImage(
+    canvasElement.toDataURL(options.targetType, options.quality ?? 1)
+  )
+}
+export async function toFile(source: any, options: TransFileOptions) {
+  const image = await translateToImage(source)
+  if (!image) throw new Error("解析source失败")
+  const canvasElement = imageToCanvas(image, options)
+  const blob = await (
+    await fetch(
       canvasElement.toDataURL(options.targetType, options.quality ?? 1)
     )
-  },
-  async toFile(source: any, options: TransFileOptions) {
-    const image = await translateToImage(source)
-    if (!image) throw new Error("解析source失败")
-    const canvasElement = imageToCanvas(image, options)
-    const blob = await (
-      await fetch(
-        canvasElement.toDataURL(options.targetType, options.quality ?? 1)
-      )
-    ).blob()
-    return new File([blob], options.fileName, { type: options.targetType })
-  },
-  async toBase64(source: any, options: TransBase64Options) {
-    const image = await translateToImage(source)
-    if (!image) throw new Error("解析source失败")
-    const canvasElement = imageToCanvas(image, options)
-    return canvasElement.toDataURL(options.targetType, options.quality ?? 1)
-  },
+  ).blob()
+  return new File([blob], options.fileName, { type: options.targetType })
+}
+export async function toBase64(source: any, options: TransBase64Options) {
+  const image = await translateToImage(source)
+  if (!image) throw new Error("解析source失败")
+  const canvasElement = imageToCanvas(image, options)
+  return canvasElement.toDataURL(options.targetType, options.quality ?? 1)
+}
+export default {
+  toFile,
+  toBase64,
+  toImage,
 }
